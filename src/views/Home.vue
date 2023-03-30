@@ -1,6 +1,6 @@
 <template>
   <div>
-    Home
+    Home <a-button @click="$event => $interface.evalScript('openDocument()')">Test</a-button>
   </div>
 </template>
 

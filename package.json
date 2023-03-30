@@ -10,6 +10,7 @@
     "preview:http": "npx http-server dist -p 8080"
   },
   "dependencies": {
+    "ant-design-vue": "^3.2.16",
     "sass": "^1.60.0",
     "vue": "^3.2.47",
     "vue-router": "4"
