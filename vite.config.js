@@ -19,6 +19,11 @@ const htmlPluginConfig = {
 
   // Body scripts
   scripts: [
+    `window.onerror = function (message, source, lineno, colno, error) {
+      alert("Error: " + message + " in " + source + " at line " + lineno + " column " + colno);
+      return false;
+    };
+    `,
     {
       src: "./assets/index.js",
       type: "text/javascript",
@@ -28,13 +33,18 @@ const htmlPluginConfig = {
 // https://vitejs.dev/config/
 export default defineConfig({
   build: {
-    target: "es2020",
     rollupOptions: {
       output: {
+        format: "iife",
         entryFileNames: `assets/[name].js`,
         chunkFileNames: `assets/[name].js`,
         assetFileNames: `assets/[name].[ext]`,
       },
+    },
+  },
+  resolve: {
+    alias: {
+      "@": "/src",
     },
   },
   plugins: [vue(), htmlPlugin(htmlPluginConfig)],
