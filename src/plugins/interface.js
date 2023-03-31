@@ -1,4 +1,44 @@
 import CSInterface, { Version } from "@/assets/CSInterface";
+import createObjectByString from "@/utils/createObjectByString";
+import { ref } from "vue";
+
+export default {
+  install: (app, options) => {
+    const csInterface = new CSInterface();
+
+    // current selected items
+    const currentSelectedItems = ref("Test");
+    const updateCurrentSelectedItems = () => {
+      try {
+        csInterface.evalScript(
+          `
+        // ECMAScript 3
+        (function() {
+          var items = [];
+          for(var i = 0; i < app.project.selection.length; i++) {
+            items.push(
+              "{" 
+                +"name: '" + app.project.selection[i].name + "', "
+                +"type: '" + app.project.selection[i].typeName + "', "
+              +"}");
+          }
+          return items.join(", ");
+        })();
+        `,
+          (res) => {
+            currentSelectedItems.value = createObjectByString(res);
+          }
+        );
+      } catch (e) {
+        // alert(e);
+      }
+    };
+    // inject
+    app.provide("evalScript", csInterface.evalScript);
+    app.provide("currentSelectedItems", currentSelectedItems);
+    app.provide("updateCurrentSelectedItems", updateCurrentSelectedItems);
+  },
+};
 
 // hostEnvironment
 // getHostEnvironment
@@ -32,8 +72,3 @@ import CSInterface, { Version } from "@/assets/CSInterface";
 // registerKeyEventsInterest
 // setWindowTitle
 // getWindowTitle
-export default {
-  install: (app, options) => {
-    app.config.globalProperties.$interface = new CSInterface();
-  },
-};
