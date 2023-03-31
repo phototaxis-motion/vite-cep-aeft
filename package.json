@@ -10,6 +10,8 @@
     "preview:http": "npx http-server dist -p 8080"
   },
   "dependencies": {
+    "@ant-design/icons-vue": "^6.1.0",
+    "@vueuse/core": "^9.13.0",
     "ant-design-vue": "^3.2.16",
     "sass": "^1.60.0",
     "vue": "^3.2.47",
