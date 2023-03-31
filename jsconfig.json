@@ -7,7 +7,9 @@
       "@views/*": ["src/views/*"],
       "@composables/*": ["src/composables/*"],
       "@assets/*": ["src/assets/*"],
-      "@plugins/*": ["src/plugins/*"]
+      "@plugins/*": ["src/plugins/*"],
+      "@utils/*": ["src/utils/*"],
+      "@scripts/*": ["src/scripts/*"]
     }
   },
 }
