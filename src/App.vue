@@ -1,5 +1,4 @@
 <script setup>
-import ProxyMode from '@/components/ProxyMode.vue'
 
 import { watch, ref, computed, inject, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
@@ -18,50 +17,63 @@ const route = useRoute()
 
 <template>
   <div class="app">
-    {{ focused }}
-    <!-- Home / About router link -->
-    <router-link to="/">Home</router-link>
-    <br>
-    <router-link to="/about">About</router-link>
-    <br>
-    {{ route.path }}
+    <div class="app-routes">
+      <router-link
+        to="/effect-collection"
+        class="app-routes__item"
+      >Effect Collection</router-link>
+      <router-link
+        to="/wiggle"
+        class="app-routes__item"
+      >Wiggle Effect Controller</router-link>
+      <router-link
+        to="proxy"
+        class="app-routes__item"
+      >Proxy Render</router-link>
+      <router-link
+        to="/2d-target"
+        class="app-routes__item"
+      >2D Target</router-link>
+    </div>
+    <a-divider></a-divider>
     <router-view></router-view>
-    <ProxyMode class="proxy-mode"></ProxyMode>
   </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss">
 // disable scroll bar
 .app {
   // fix max window
+  font-family: 'Roboto', 'Noto Serif TC', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
   position: fixed;
   top: 0;
   left: 0;
-
+  font-size: 12px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
+.app-routes {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0 20px;
 
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
+  &__item {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin: 10px;
+    text-decoration: none;
+    color: #000;
 
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-
-.proxy-mode {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  left: 0;
+    &:active,
+    &:hover,
+    &.router-link-active {
+      color: #fff;
+      background-color: #000;
+    }
+  }
 }
 </style>

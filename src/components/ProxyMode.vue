@@ -5,7 +5,6 @@ import { activeProxyScript, deactiveProxyScript, getRenderScriptBySettings } fro
 
 const evalScript = inject('evalScript')
 
-
 // MODE
 const MODES = {
   title: "Modes",
@@ -114,4 +113,34 @@ const clickProxyModeHandler = () => {
 </template>
 
 
-<style lang="scss" scoped></style>
+<style lang="scss">
+.ant-dropdown-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background-color: #fff;
+  color: #000;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+
+  .anticon {
+    margin-left: auto;
+    transition: all 0.3s;
+  }
+
+  &.ant-dropdown-open .anticon {
+    transform: rotate(180deg);
+  }
+
+  &:hover {
+    border-color: #40a9ff;
+    color: #40a9ff;
+  }
+}
+</style>
