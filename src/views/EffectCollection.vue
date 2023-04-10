@@ -1,68 +1,35 @@
 <template>
   <div class="effect-collection">
-    <!-- {{ effects }} \ {{ effectList }} -->
-    <a-collapse v-model="activeNames">
-      <a-collapse-panel
-        v-for="(effect, index) in effects"
-        :key="index"
-        :header="effect && effect.name"
-        :name="index"
-      >
-        <template #extra>
-          <a-space>
-            <!-- add to layer -->
-            <a-popconfirm
-              title="新增特效到當前選擇的圖層？"
-              @confirm="$event => { confirmAddToLayerHandler(effect && effect.name) }"
-              ok-text="是"
-              cancel-text="否"
-            >
-              <a-button
-                type="primary"
-                size="small"
-                @click="$event => $event.stopPropagation()"
-              >套用 Effect Collection</a-button>
-            </a-popconfirm>
-            <!-- delete from list -->
-            <a-popconfirm
-              title="確定要刪除這個特效組？"
-              @confirm="$event => { confirmDeleteHandler(effect && effect.name) }"
-              ok-text="是"
-              cancel-text="否"
-            >
-              <a-button
-                danger
-                size="small"
-                @click="$event => $event.stopPropagation()"
-              >刪除</a-button>
-            </a-popconfirm>
-          </a-space>
-        </template>
-        <template #default>
-          <a-descriptions
-            size="small"
-            v-for="setting in effect && effect.settings"
-            :key="setting.matchName"
-            :title="setting.name"
-          >
-            <a-descriptions-item
-              v-for="item in setting.children"
-              :key="item.matchName"
-              :label="item.name"
-              :style="{ display: item.name === 'Compositing Options' ? 'none' : 'block' }"
-            >
-              {{ item.value }}
-            </a-descriptions-item>
-          </a-descriptions>
-        </template>
-      </a-collapse-panel>
-    </a-collapse>
-    <a-divider />
+    <LocalStorageEffetsTool
+      v-if="!loading"
+      :ref="(el) => { localToolRef = el }"
+    ></LocalStorageEffetsTool>
+    <!-- Add Button -->
+    <a-row>
+      <a-button
+        size="large"
+        class="effect-collection__add-button"
+        @click="visibleAddLocalCollection = true"
+      >新增快取特效</a-button>
+    </a-row>
+    <ProjectEffectsTool
+      v-if="!loading"
+      :ref="(el) => { projectToolRef = el }"
+    ></ProjectEffectsTool>
+    <a-row>
+      <a-button
+        size="large"
+        class="effect-collection__add-button"
+        @click="visibleAddProjectCollection = true"
+      >新增專案特效</a-button>
+    </a-row>
+
+    <!-- 快取特效新增 -->
     <a-drawer
       height="200"
-      title="新增特效 Collections"
+      title="新增快取特效"
       placement="bottom"
-      :visible="visibleAddCollection"
+      :visible="visibleAddLocalCollection"
       @close="addCollectionDrawerCloseHandler"
     >
       <template #footer>
@@ -74,17 +41,36 @@
           />
           <a-button
             size="large"
-            @click="addEffectHandler"
+            @click="addLocalEffectHandler"
             type="primary"
           >新增 Effect Collection</a-button>
         </div>
       </template>
     </a-drawer>
-    <a-button
-      size="large"
-      class="effect-collection__add-button"
-      @click="visibleAddCollection = true"
-    >新增當前選取特效到 Collection</a-button>
+    <!-- 專案特效新增 -->
+    <a-drawer
+      height="200"
+      title="新增專案特效"
+      placement="bottom"
+      :visible="visibleAddProjectCollection"
+      @close="addCollectionDrawerCloseHandler"
+    >
+      <template #footer>
+        <div class="effect-collection__add">
+          <a-input
+            size="large"
+            v-model:value="addEffectName"
+            placeholder="輸入特效組名稱"
+          />
+          <a-button
+            size="large"
+            @click="addProjectEffectHandler"
+            type="primary"
+          >新增 Effect Collection</a-button>
+        </div>
+      </template>
+    </a-drawer>
+
     <a-alert
       v-if="alertString"
       :message="alertString"
@@ -98,82 +84,117 @@
 
 <script setup>
 import { useLocalStorage } from '@vueuse/core'
-import { getCurrentSelectedEffects, setCurrentSelectedEffectsByString } from '@/scripts/EffectCollection'
-import { ref, inject, computed, onMounted } from 'vue'
+import { getCurrentSelectedEffects, getScriptCopyCurrentLayerEffectsToNewLayer, checkSelectedLayerEffectHasNoCustomValue } from '@/scripts/EffectCollection'
+import { ref, inject, computed } from 'vue'
+import LocalStorageEffetsTool from '@/components/LocalStorageEffetsTool.vue'
+import ProjectEffectsTool from '@/components/ProjectEffectsTool.vue'
+import DDTarget from '@/views/2DTarget.vue'
 
+const loading = ref(false)
+const localToolRef = ref(null)
+const projectToolRef = ref(null)
 const alertString = ref('')
 const evalScript = inject('evalScript')
-
-const effectList = useLocalStorage('effect-collection', {})
-onMounted(() => {
-})
-
-// get all effects
-const effects = computed(() => {
-  const effects = []
-  // object entries
-  Object.entries(effectList.value).forEach(([key, value]) => {
-    effects.push({
-      name: key,
-      settings: value
-    })
-  })
-  return effects
-})
-
-// effect panel collapse
-const activeNames = ref([])
-
-const confirmAddToLayerHandler = (effectName) => {
-  const effect = effectList.value[effectName]
-  if (effect) {
-    const effectString = JSON.stringify(effect); // array to string
-    try {
-      evalScript(setCurrentSelectedEffectsByString(effectString), (res) => {
-        if (res.startsWith('Error')) {
-          alertString.value = res;
-          return
-        }
-      })
-    } catch (error) {
-      alertString.value = error
-    }
+const localEffectList = useLocalStorage('effect-collection', {})
+const localEffectNames = computed(() => {
+  if (localToolRef.value) {
+    return localToolRef.value.effectsNames
   }
-}
-const confirmDeleteHandler = (effectName) => {
-  if (effectList.value[effectName]) {
-    delete effectList.value[effectName]
+  return []
+})
+const projectEffectNames = computed(() => {
+  if (projectToolRef.value) {
+    return projectToolRef.value.effectsNames
   }
-}
+  return []
+})
 
 // add effect
 const addEffectName = ref('')
-const visibleAddCollection = ref(false)
+const visibleAddLocalCollection = ref(false)
+const visibleAddProjectCollection = ref(false)
 const addCollectionDrawerCloseHandler = () => {
-  visibleAddCollection.value = false
+  visibleAddLocalCollection.value = false
+  visibleAddProjectCollection.value = false
   addEffectName.value = ''
 }
-const addEffectHandler = (e) => {
+
+
+
+const addLocalEffectHandler = (e) => {
+  loading.value = true
   addEffectName.value = addEffectName.value.trim()
   // prevent empty name
   if (addEffectName.value === '') {
     alertString.value = '特效組名稱不可為空'
+    loading.value = false
     return
   }
 
   // check name is exist
-  if (effectList.value[addEffectName.value]) {
+  if (localEffectNames.value.includes(addEffectName.value)) {
     alertString.value = '特效組名稱已存在'
+    loading.value = false
     return
   }
 
-  evalScript(getCurrentSelectedEffects, (res) => {
+  // check Selected Layer Effect Has No Custom Value
+  evalScript(checkSelectedLayerEffectHasNoCustomValue, (res) => {
+    if (res === 'false') {
+      alertString.value = '快取無法存取含有自訂值的特效，請先移除自訂值的特效，或是改用專案特效';
+      loading.value = false;
+      return
+    } else if (res === 'true') {
+      evalScript(getCurrentSelectedEffects, (res) => {
+        if (res.startsWith('Error')) {
+          alertString.value = res;
+          return
+        } else {
+          localEffectList.value[addEffectName.value] = JSON.parse(res)
+        }
+        setTimeout(() => {
+          loading.value = false
+        }, 500)
+      })
+    } else {
+      alertString.value = '未知錯誤';
+      loading.value = false
+    }
+  })
+
+  visibleAddLocalCollection.value = false
+}
+
+const addProjectEffectHandler = (e) => {
+  loading.value = true
+  addEffectName.value = addEffectName.value.trim()
+  // prevent empty name
+  if (addEffectName.value === '') {
+    alertString.value = '特效組名稱不可為空'
+    loading.value = false
+    return
+  }
+
+  // check name is exist
+  if (projectEffectNames.value.includes(addEffectName.value)) {
+    alertString.value = '特效組名稱已存在'
+    loading.value = false
+    return
+  }
+
+  // Add effect layer
+  evalScript(getScriptCopyCurrentLayerEffectsToNewLayer(addEffectName.value), (res) => {
     if (res.startsWith('Error')) {
       alertString.value = res;
       return
+    } else {
+      addEffectName.value = ''
     }
-    effectList.value[addEffectName.value] = JSON.parse(res)
   })
+  setTimeout(() => {
+    loading.value = false
+  }, 500)
+  visibleAddProjectCollection.value = false
 }
 
 // { "Wiggle Rotation Frequency": { "Slider": 1 }, "Wiggle Position Amplitude": { "Slider": 10 }, "Wiggle Position Frequency": { "Slider": 1 } } 
@@ -197,32 +218,5 @@ const addEffectHandler = (e) => {
     }
   }
 
-  .ant-descriptions {
-    margin-bottom: 4px;
-  }
-
-  .ant-descriptions-header {
-    margin-bottom: 0;
-
-    .ant-descriptions-title {
-      font-size: 12px;
-      line-height: 1.2;
-    }
-  }
-
-  .ant-descriptions-item {
-    padding: 0 !important;
-
-
-    &-label {
-      font-size: 12px;
-      line-height: 1.2;
-    }
-
-    &-content {
-      font-size: 12px;
-      line-height: 1.2;
-    }
-  }
 }
 </style>
