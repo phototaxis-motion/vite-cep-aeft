@@ -1,10 +1,12 @@
 import CSInterface, { Version } from "@/assets/CSInterface";
 import createObjectByString from "@/utils/createObjectByString";
 import { ref } from "vue";
+import { useWindowSize } from "@vueuse/core";
 
 export default {
   install: (app, options) => {
     const csInterface = new CSInterface();
+    const windowSize = useWindowSize();
 
     // current selected items
     const currentSelectedItems = ref("Test");
@@ -35,27 +37,11 @@ export default {
     };
     window.addEventListener("resize", () => {
       updateCurrentSelectedItems();
-      // get window size
-      csInterface.evalScript(
-        `(function () {
-        var panelWidth, panelHeight;
-    
-        if (this instanceof Panel) {
-            panelWidth = this.size[0];
-            panelHeight = this.size[1];
-        } else {
-            panelWidth = this.window.bounds.width;
-            panelHeight = this.window.bounds.height;
-        }
-    
-        return [panelWidth, panelHeight];
-    })()`,
-        (res) => {}
-      );
     });
 
     // inject
     app.provide("evalScript", csInterface.evalScript);
+    app.provide("windowSize", windowSize);
     app.provide("currentSelectedItems", currentSelectedItems);
     app.provide("updateCurrentSelectedItems", updateCurrentSelectedItems);
   },

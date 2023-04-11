@@ -6,6 +6,7 @@ import { useWindowFocus } from '@vueuse/core'
 
 const focused = useWindowFocus()
 const updateCurrentSelectedItems = inject('updateCurrentSelectedItems')
+const windowSize = inject('windowSize') // TODO
 watch(focused, (val) => {
   if (val) {
     updateCurrentSelectedItems()
@@ -16,7 +17,10 @@ const route = useRoute()
 </script>
 
 <template>
-  <div class="app">
+  <div
+    class="app"
+    :style="{ height: `${windowSize.height}px` }"
+  >
     <div class="app-routes">
       <router-link
         to="/effect-collection"
@@ -47,8 +51,8 @@ const route = useRoute()
   font-family: 'Roboto', 'Noto Serif TC', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
   position: fixed;
+  overflow: auto;
   top: 0;
   left: 0;
   font-size: 12px;

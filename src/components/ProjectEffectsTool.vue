@@ -62,6 +62,7 @@
     </a-collapse>
     <a-empty
       :image="simpleEmptyImage"
+      :style="{ marginTop: '8px', marginBottom: '8px' }"
       v-else
     />
 
@@ -99,7 +100,7 @@ const effects = computed(() => {
 
 watch(compLayersNames, (nameList) => {
   if (nameList.length === 0) {
-    alertString.value = '目前沒有特效組'
+    alertString.value = ''
   } else {
     for (let i = 0; i < nameList.length; i++) {
       const name = nameList[i];
@@ -152,7 +153,7 @@ defineExpose({
 </script>
 <style lang="scss">
 .project-effects-tool {
-  padding-bottom: 16px;
+  padding: 16px 8px;
 
   .ant-descriptions {
     margin-bottom: 4px;

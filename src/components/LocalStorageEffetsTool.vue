@@ -63,6 +63,7 @@
     </a-collapse>
     <a-empty
       :image="simpleEmptyImage"
+      :style="{ marginTop: '8px', marginBottom: '8px' }"
       v-else
     />
 
@@ -131,7 +132,7 @@ defineExpose({
 
 <style lang="scss">
 .local-storage-effects-tool {
-  padding-bottom: 16px;
+  padding: 16px 8px;
 
   .ant-descriptions {
     margin-bottom: 4px;

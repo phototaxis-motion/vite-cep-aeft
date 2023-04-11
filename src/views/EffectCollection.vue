@@ -32,18 +32,28 @@
       :visible="visibleAddLocalCollection"
       @close="addCollectionDrawerCloseHandler"
     >
-      <template #footer>
+      <template #default>
         <div class="effect-collection__add">
-          <a-input
-            size="large"
-            v-model:value="addEffectName"
-            placeholder="輸入特效組名稱"
-          />
-          <a-button
-            size="large"
-            @click="addLocalEffectHandler"
-            type="primary"
-          >新增 Effect Collection</a-button>
+          <a-form
+            layout="inline"
+            @submit="addLocalEffectHandler"
+          >
+            <a-form-item>
+              <a-input
+                size="large"
+                v-model:value="addEffectName"
+                :rules="[{ required: true, message: '請輸入特效名稱!' }]"
+                placeholder="輸入特效組名稱"
+              />
+            </a-form-item>
+            <a-form-item>
+              <a-button
+                size="large"
+                type="primary"
+                html-type="submit"
+              >新增</a-button>
+            </a-form-item>
+          </a-form>
         </div>
       </template>
     </a-drawer>
@@ -55,18 +65,29 @@
       :visible="visibleAddProjectCollection"
       @close="addCollectionDrawerCloseHandler"
     >
-      <template #footer>
+      <template #default>
         <div class="effect-collection__add">
-          <a-input
-            size="large"
-            v-model:value="addEffectName"
-            placeholder="輸入特效組名稱"
-          />
-          <a-button
-            size="large"
-            @click="addProjectEffectHandler"
-            type="primary"
-          >新增 Effect Collection</a-button>
+          <a-form
+            layout="inline"
+            @submit="addProjectEffectHandler"
+          >
+            <a-form-item>
+              <a-input
+                size="large"
+                v-model:value="addEffectName"
+                :rules="[{ required: true, message: '請輸入特效名稱!' }]"
+                placeholder="輸入特效組名稱"
+              />
+            </a-form-item>
+            <!-- submit -->
+            <a-form-item>
+              <a-button
+                htmlType="submit"
+                size="large"
+                type="primary"
+              >新增</a-button>
+            </a-form-item>
+          </a-form>
         </div>
       </template>
     </a-drawer>
@@ -121,7 +142,7 @@ const addCollectionDrawerCloseHandler = () => {
 
 
 
-const addLocalEffectHandler = (e) => {
+const addLocalEffectHandler = () => {
   loading.value = true
   addEffectName.value = addEffectName.value.trim()
   // prevent empty name
@@ -158,6 +179,9 @@ const addLocalEffectHandler = (e) => {
       })
     } else {
       alertString.value = '未知錯誤';
+      if (res.startsWith('Error')) {
+        alertString.value = res;
+      }
       loading.value = false
     }
   })
@@ -183,18 +207,23 @@ const addProjectEffectHandler = (e) => {
   }
 
   // Add effect layer
-  evalScript(getScriptCopyCurrentLayerEffectsToNewLayer(addEffectName.value), (res) => {
-    if (res.startsWith('Error')) {
-      alertString.value = res;
-      return
-    } else {
-      addEffectName.value = ''
-    }
-  })
-  setTimeout(() => {
-    loading.value = false
-  }, 500)
-  visibleAddProjectCollection.value = false
+  try {
+    evalScript(getScriptCopyCurrentLayerEffectsToNewLayer(addEffectName.value), (res) => {
+      if (res.startsWith('Error')) {
+        alertString.value = res;
+        return
+      } else {
+        addEffectName.value = ''
+      }
+    })
+  } catch (error) {
+    alertString.value = error
+  } finally {
+    setTimeout(() => {
+      loading.value = false
+    }, 500)
+    visibleAddProjectCollection.value = false
+  }
 }
 
 // { "Wiggle Rotation Frequency": { "Slider": 1 }, "Wiggle Position Amplitude": { "Slider": 10 }, "Wiggle Position Frequency": { "Slider": 1 } } 
@@ -202,9 +231,8 @@ const addProjectEffectHandler = (e) => {
 
 <style lang="scss">
 .effect-collection {
-  max-height: 100%;
-  overflow-y: auto;
   text-align: left;
+  padding-bottom: 40px;
 
   &__add {
     display: flex;
