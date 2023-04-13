@@ -23,9 +23,13 @@ const route = useRoute()
   >
     <div class="app-routes">
       <router-link
+        to="/effects-preset"
+        class="app-routes__item"
+      >Effect Preset</router-link>
+      <router-link
         to="/effect-collection"
         class="app-routes__item"
-      >Effect Collection</router-link>
+      >Effect collection</router-link>
       <router-link
         to="/wiggle"
         class="app-routes__item"

@@ -379,7 +379,7 @@ try {
     // alert("請確認當前選中的圖層是否正確");
     app.executeCommand(app.findMenuCommandId("Paste"));
 
-    alert("已將效果複製到當前選中的圖層");
+    // alert("已將效果複製到當前選中的圖層");
   })()
 } catch (e) {
   'Error:' + e;
