@@ -64,8 +64,7 @@ try {
  * @returns Folder
  */
 export const getUserPresetFolder = `(function() {
-  var aeVersion = app.version.split(".")[0];
-  aeVersion = aeVersion > 20 ? "20" + aeVersion : aeVersion;
+  var aeVersion = app.version.split(".")[0] > 20 ? "20" + app.version.split(".")[0] : app.version.split(".")[0];
   // 获取用户文档路径
   var userDocumentsFolder = Folder.myDocuments;
   var presetFolder = userDocumentsFolder.absoluteURI + "/Adobe/After Effects " + aeVersion + "/User Presets";
@@ -79,43 +78,36 @@ export const getUserPresetFolder = `(function() {
 })()
 `;
 
-const saveSelectedEffectsAsPreset = `(function() {
-  var comp = app.project.activeItem;
-  if (!comp || !(comp instanceof CompItem)) {
-    alert("請選擇一個Comp。");
-    return false;
-  }
+const saveSelectedEffectsAsPreset = `
+(function() {
+  var comp = app.project.activeItem,
+    layer = comp.selectedLayers[0],
+    effects = layer.property("ADBE Effect Parade"),
+    selectedEffect = [],
+    selectedProperty = [];
 
-  if (comp.selectedLayers.length === 0 || comp.selectedLayers.length > 1) {
-    alert("請選擇一個圖層。");
-    return false;
-  }
+  if (!comp || !(comp instanceof CompItem)) return alert("請選擇一個Comp。");
+  if (comp.selectedLayers.length === 0 || comp.selectedLayers.length > 1) return alert("請選擇一個圖層。");
 
-  var layer = comp.selectedLayers[0];
-  var effects = layer.property("ADBE Effect Parade");
-  var selectedEffect = [];
   for (var i = 1; i <= effects.numProperties; i++) {
     var effect = effects.property(i);
     if (effect.selected) {
       selectedEffect.push(effect);
     }
   }
-  if (selectedEffect.length === 0) {
-    alert("請選擇至少一個效果。");
-    return false;
-  }
-  // layer.selectedProperties for loop check has property is not effect
+  if (selectedEffect.length === 0) return alert("請選擇至少一個效果。");
+
   for (var i = 0; i < layer.selectedProperties.length; i++) {
     var property = layer.selectedProperties[i];
-    if (!property.isEffect) {
-      alert("注意: 儲存的屬性中有非效果屬性。"); // TODO 存到檔案中
-      break;
-    }
+    if (!property.isEffect) selectedProperty.push(property);
   }
+  
+  if (selectedProperty.length > 0) alert("注意: 儲存的屬性中有非效果屬性。");
 
   app.executeCommand(app.findMenuCommandId("Save Animation Preset..."));
   return true;
-})()`;
+})()
+`;
 
 /**
  * 匯出效果預設檔案到指定路徑(強制更改檔名到指定路徑)
