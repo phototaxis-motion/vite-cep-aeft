@@ -1,10 +1,10 @@
 <script setup>
-import { ref, inject, computed } from 'vue'
+import { ref, inject, computed, onMounted } from 'vue'
 import { PlusCircleFilled, DisconnectOutlined, LinkOutlined, UpCircleFilled } from '@ant-design/icons-vue';
-import { activeProxyScript, deactiveProxyScript, getRenderScriptBySettings } from '@/scripts/proxyMode'
+import { activeProxyScript, deactiveProxyScript, getRenderScriptBySettings, getNumItemsProxy } from '@/scripts/proxyMode'
 
 const evalScript = inject('evalScript')
-
+const numItems = ref(0)
 // MODE
 const MODES = {
   title: "Modes",
@@ -39,23 +39,40 @@ const addRenderQueue = () => {
   evalScript(script)
 }
 
-
+const checkProxyNumItems = async () => {
+  await new Promise((resolve) => {
+    evalScript(getNumItemsProxy, (res) => {
+      numItems.value = Number(res)
+      resolve()
+    })
+  })
+}
 const connected = ref(true)
 const connectLoading = ref(false)
-const clickProxyModeHandler = () => {
+const clickProxyModeHandler = async () => {
   connectLoading.value = true
   if (connected.value) {
-    evalScript(deactiveProxyScript, (res) => {
-      connected.value = res === 'true'
-    });
+    await new Promise((resolve) => {
+      evalScript(deactiveProxyScript, (res) => {
+        connected.value = res === 'true'
+        resolve()
+      });
+    })
   } else {
-    evalScript(activeProxyScript, (res) => {
-      connected.value = res === 'true'
-    });
+    await new Promise((resolve) => {
+      evalScript(activeProxyScript, (res) => {
+        connected.value = res === 'true'
+        resolve()
+      });
+    })
   }
+  await checkProxyNumItems()
   connectLoading.value = false
 }
 
+onMounted(async () => {
+  await checkProxyNumItems()
+})
 </script>
 <template>
   <a-row
@@ -98,16 +115,18 @@ const clickProxyModeHandler = () => {
         </template>
       </a-button>
       <!-- set proxy mode -->
-      <a-button
-        size="large"
-        :loading="connectLoading"
-        @click="clickProxyModeHandler"
-      >
-        <template #icon>
-          <link-outlined v-if="connected" />
-          <disconnect-outlined v-else />
-        </template>
-      </a-button>
+      <a-badge :count="numItems">
+        <a-button
+          size="large"
+          :loading="connectLoading"
+          @click="clickProxyModeHandler"
+        >
+          <template #icon>
+            <link-outlined v-if="connected" />
+            <disconnect-outlined v-else />
+          </template>
+        </a-button>
+      </a-badge>
     </a-col>
   </a-row>
 </template>

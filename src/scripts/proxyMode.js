@@ -32,9 +32,6 @@ for (var i = 1; i <= comps.length; i++) {
     }
   }
 }
-alert("共有 " + count.all + " Clips,其中 " + count.exist + " 個已Proxy", "Proxy Done");
-
-
 
 return true;
 })()
@@ -59,9 +56,9 @@ for (var i = 1; i <= comps.length; i++) {
   }
 }
 if (count.all > 0) {
-  alert("共有 " + count.all + " Clips，已移除Proxy", "Proxy Clips");
+  // alert("共有 " + count.all + " Clips，已移除Proxy", "Proxy Clips");
 } else {
-  alert("沒有任何Clips可以移除Proxy", "Proxy Clips");
+  // alert("沒有任何Clips可以移除Proxy", "Proxy Clips");
 }
 
 
@@ -94,7 +91,7 @@ export const getRenderScriptBySettings = (
   var length = app.project.items.length;
   var count = 0;
 
-  alert("開始搜尋包含'" + searchStr + "'的Composition", "開始搜尋");
+  // alert("開始搜尋包含'" + searchStr + "'的Composition", "開始搜尋");
 
   // 遍历所有的 Composition
   for (var i = 1; i <= length; i = i + 1) {
@@ -104,7 +101,7 @@ export const getRenderScriptBySettings = (
     if (comp instanceof CompItem && comp.name.indexOf(searchStr) !== -1) {
       count = count + 1;
       // 设置输出路径和文件名 Render settings
-      var outputPath = outputFolder.fsName + "&#92&#92" + comp.name + ".mov";
+      var outputPath = outputFolder.fsName + "/" + comp.name + ".mov";
       var queueItem = render.items.add(comp);
       var file = new File(outputPath);
       var renderSettingTemplateName = '${settingName}';
@@ -127,7 +124,7 @@ export const getRenderScriptBySettings = (
         }
       }
       if (!hasRenderSetting) {
-        alert("沒有找到Render Setting Template: " + renderSettingTemplateName, "錯誤", true);
+        alert("沒有找到Render Setting Template: " + renderSettingTemplateName + " 請安裝AOM", "錯誤", true);
       }
 
       // Check output module
@@ -138,14 +135,14 @@ export const getRenderScriptBySettings = (
         }
       }
       if (!hasOutputModule) {
-        alert("沒有找到Output Module Template: " + outputModuleTemplateName, "錯誤", true);
+        alert("沒有找到Output Module Template: " + outputModuleTemplateName + " 請安裝AOM", "錯誤", true);
       }
     }
   }
   if (count == 0) {
     alert("沒有找到任何包含「_Clips」的Composition ！", "沒有找到");
   } else {
-    alert("共有 " + count + " Clips，已經加入Render Queue", "完成");
+    // alert("共有 " + count + " Clips，已經加入Render Queue", "完成");
     count = 0;
   }
 
@@ -198,7 +195,22 @@ export const getRenderScriptBySettings = (
       render.render();
     }
   } else {
-    alert("沒有任何Clips可以渲染！", "No Clips", true);
+    // alert("沒有任何Clips可以渲染！", "No Clips", true);
   }
 
+})();`;
+
+/**
+ * 取得有多少個 Proxy
+ */
+export const getNumItemsProxy = `(function(){
+  var comps = app.project.items;
+  var count = 0;
+  for (var i = 1; i <= comps.length; i++) {
+    var comp = comps[i];
+    if (comp instanceof CompItem && comp.proxySource != null) {
+      count = count + 1;
+    }
+  }
+  return count;
 })();`;

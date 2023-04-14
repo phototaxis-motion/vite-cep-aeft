@@ -6,6 +6,7 @@ import EffectCollection from "@/views/EffectCollection.vue";
 import EffectsPreset from "@/views/EffectsPreset.vue";
 import Wiggle from "@/views/Wiggle.vue";
 import DDTarget from "@/views/2DTarget.vue";
+import LookAt from "@/views/LookAt.vue";
 
 const routes = [
   { path: "/", component: home },
@@ -15,6 +16,7 @@ const routes = [
   { path: "/effects-preset", component: EffectsPreset },
   { path: "/wiggle", component: Wiggle },
   { path: "/2d-target", component: DDTarget },
+  { path: "/look-at", component: LookAt },
 ];
 
 const router = VueRouter.createRouter({

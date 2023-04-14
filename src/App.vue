@@ -26,10 +26,10 @@ const route = useRoute()
         to="/effects-preset"
         class="app-routes__item"
       >Effect Preset</router-link>
-      <router-link
-        to="/effect-collection"
-        class="app-routes__item"
-      >Effect collection</router-link>
+      <!-- <router-link
+            to="/effect-collection"
+            class="app-routes__item"
+          >Effect collection</router-link> -->
       <router-link
         to="/wiggle"
         class="app-routes__item"
@@ -40,8 +40,12 @@ const route = useRoute()
       >Proxy Render</router-link>
       <router-link
         to="/2d-target"
-        class="app-routes__item"
+        class="app-routes__item -disabled"
       >2D Target</router-link>
+      <router-link
+        to="/look-at"
+        class="app-routes__item"
+      >Look At</router-link>
     </div>
     <a-divider></a-divider>
     <router-view></router-view>
@@ -81,6 +85,12 @@ const route = useRoute()
     &.router-link-active {
       color: #fff;
       background-color: #000;
+    }
+
+    &.-disabled {
+      color: #ccc;
+      border-color: #ccc;
+      pointer-events: none;
     }
   }
 }
